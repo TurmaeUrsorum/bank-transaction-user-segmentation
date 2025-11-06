@@ -98,3 +98,7 @@
 bank_transaction:
   type: pandas.CSVDataset
   filepath: data/01_raw/bank_transactions.csv
+
+clean_bank_transaction:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/cleaning_bank_transactions.parquet

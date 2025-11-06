@@ -36,7 +36,7 @@ def compare_passenger_capacity_go(preprocessed_shuttles: pd.DataFrame):
 
 
 def create_confusion_matrix(companies: pd.DataFrame):
-    matplotlib.use('Agg')
+    matplotlib.use("Agg")
 
     actuals = [0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1]
     predicted = [1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1]
@@ -48,8 +48,8 @@ def create_confusion_matrix(companies: pd.DataFrame):
     )
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    sn.heatmap(confusion_matrix, annot=True, fmt='d', cmap='Blues', ax=ax)
-    ax.set_title('Confusion Matrix')
+    sn.heatmap(confusion_matrix, annot=True, fmt="d", cmap="Blues", ax=ax)
+    ax.set_title("Confusion Matrix")
     plt.tight_layout()
 
     return fig

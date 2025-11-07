@@ -102,3 +102,7 @@ bank_transaction:
 clean_bank_transaction:
   type: pandas.ParquetDataset
   filepath: data/02_intermediate/cleaning_bank_transactions.parquet
+
+# feature_engineering:
+#   type: pandas.ParquetDataset
+#   filepath: data/03_primary/feature_engineering.parquet

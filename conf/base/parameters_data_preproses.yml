@@ -7,3 +7,11 @@
 
 feature_engineering:
   N: 5
+
+skew_fix:
+  method: "yeo-johnson"
+
+handle_outliers:
+  columns:
+    - "TransactionAmount_log"
+    - "AmountBalanceRatio_yj"

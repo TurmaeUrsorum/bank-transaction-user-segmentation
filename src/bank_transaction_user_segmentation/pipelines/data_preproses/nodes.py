@@ -3,13 +3,18 @@ This is a boilerplate pipeline 'data_preproses'
 generated using Kedro 1.0.0
 """
 
+from sklearn.preprocessing import PowerTransformer, RobustScaler
 import pandas as pd
 import typing as tp
+import numpy as np
+import logging
 
 # Feature Engineering
 
+log = logging.getLogger(__name__)
 
 def feature_engineering(df: pd.DataFrame, params: tp.Dict) -> pd.DataFrame:
+    df = df.copy()
     # Rasio Amount/Balance (hindari division by zero)
     df["AmountBalanceRatio"] = df["TransactionAmount"] / (df["AccountBalance"] + 1e-6)
 
@@ -27,4 +32,85 @@ def feature_engineering(df: pd.DataFrame, params: tp.Dict) -> pd.DataFrame:
         lambda x: x if x in top_locations else "OTHER"
     )
 
+    return df
+
+
+def skew_fix(df: pd.DataFrame, params: tp.Dict) -> pd.DataFrame:
+    df = df.copy()
+
+    # fitur transaction Amount
+    df["TransactionAmount_log"] = np.log1p(df["TransactionAmount"])
+
+    # TransactionAmount masih ada
+    pt = PowerTransformer(method=params["method"])
+    df["AmountBalanceRatio_yj"] = pt.fit_transform(df[["AmountBalanceRatio"]])
+
+    df = df.drop(["TransactionAmount", "AmountBalanceRatio"], axis=1)
+
+    log.info(f"jumlah column: {df.columns}")
+
+    return df
+
+def handle_outliers_iqr(df: pd.DataFrame, columns: tp.List, k: float=1.5, method: str="remove") -> pd.DataFrame:
+    """
+    Deteksi & tangani outliers dengan metode IQR.
+    
+    Params:
+    --------
+    df : pd.DataFrame
+        Dataframe input
+    columns : list
+        List nama kolom numerik
+    k : float
+        Faktor IQR (default = 1.5 → aturan standar)
+    method : str
+        - "detect" → return DataFrame hanya outliers
+        - "remove" → return DataFrame tanpa outliers
+        - "capping" → return DataFrame dengan outliers diganti
+    
+    Return:
+    --------
+    pd.DataFrame
+    """
+    df_copy = df.copy()
+    mask = pd.Series(False, index=df.index)  # semua False dulu
+    
+    for col in columns:
+        Q1 = df[col].quantile(0.25)
+        Q3 = df[col].quantile(0.75)
+        IQR = Q3 - Q1
+        lower = Q1 - k * IQR
+        upper = Q3 + k * IQR
+        
+        if method == "capping":
+            # Ganti nilai outlier dengan batas bawah/atas
+            df_copy[col] = np.where(df[col] < lower, lower,
+                             np.where(df[col] > upper, upper, df[col]))
+        
+        else:
+            # Tandai outlier untuk detect/remove
+            mask |= (df[col] < lower) | (df[col] > upper)
+    
+    if method == "detect":
+        return df[mask]  # hanya outliers
+    elif method == "remove":
+        return df[~mask]  # data tanpa outliers
+    elif method == "capping":
+        return df_copy  # data dengan capping
+    else:
+        raise ValueError("method harus salah satu dari: 'detect', 'remove', 'capping'")
+    
+def handle_outliers(df: pd.DataFrame, params: tp.Dict) -> pd.DataFrame:
+    columns = params["columns"]
+    df = handle_outliers_iqr(df, columns=columns, k=1.5, method="capping")
+    return df
+
+def robust_scaler(df: pd.DataFrame) -> pd.DataFrame:
+    scaler = RobustScaler()
+    df = df.copy()
+    df['TransactionAmount_log_scaled'] = scaler.fit_transform(
+        df[['TransactionAmount_log']]
+    )
+    df = df.drop(['TransactionAmount_log'], axis=1)
+    log.info(f"hasil robust scaler: {df.columns}")
     return df

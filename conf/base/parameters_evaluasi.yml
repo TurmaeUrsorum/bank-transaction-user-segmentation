@@ -3,3 +3,16 @@
 #
 # Documentation for this file format can be found in "Parameters"
 # Link: https://docs.kedro.org/en/1.0.0/configuration/parameters.html
+
+interpretasi_cluster:
+  cat_cols:
+    - 'TransactionType'
+    - 'Channel'
+    - 'CustomerOccupation' 
+    - 'MerchantTopN'
+    - 'LocationTopN'
+  num_cols:
+    - 'TransactionAmount_log_scaled'
+    - 'AccountBalance'
+    - 'CustomerAge'
+    - 'TransactionDuration'

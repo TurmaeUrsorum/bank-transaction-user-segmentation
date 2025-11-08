@@ -114,3 +114,7 @@ final_preprocessed_df:
 modeling_kmedoids:
   type: pandas.ParquetDataset
   filepath: data/07_model_output/modeling_kmedoids.parquet
+
+interpretasi_cluster:
+  type: text.TextDataset
+  filepath: data/08_reporting/interpretasi_cluster.txt

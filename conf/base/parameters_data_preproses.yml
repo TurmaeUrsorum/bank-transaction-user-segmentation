@@ -15,3 +15,5 @@ handle_outliers:
   columns:
     - "TransactionAmount_log"
     - "AmountBalanceRatio_yj"
+  k: 1.5
+  method: "capping"

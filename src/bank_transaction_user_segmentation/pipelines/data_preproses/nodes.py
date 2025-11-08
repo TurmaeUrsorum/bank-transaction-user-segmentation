@@ -52,26 +52,6 @@ def skew_fix(df: pd.DataFrame, params: tp.Dict) -> pd.DataFrame:
     return df
 
 def handle_outliers_iqr(df: pd.DataFrame, columns: tp.List, k: float=1.5, method: str="remove") -> pd.DataFrame:
-    """
-    Deteksi & tangani outliers dengan metode IQR.
-    
-    Params:
-    --------
-    df : pd.DataFrame
-        Dataframe input
-    columns : list
-        List nama kolom numerik
-    k : float
-        Faktor IQR (default = 1.5 → aturan standar)
-    method : str
-        - "detect" → return DataFrame hanya outliers
-        - "remove" → return DataFrame tanpa outliers
-        - "capping" → return DataFrame dengan outliers diganti
-    
-    Return:
-    --------
-    pd.DataFrame
-    """
     df_copy = df.copy()
     mask = pd.Series(False, index=df.index)  # semua False dulu
     
@@ -102,7 +82,7 @@ def handle_outliers_iqr(df: pd.DataFrame, columns: tp.List, k: float=1.5, method
     
 def handle_outliers(df: pd.DataFrame, params: tp.Dict) -> pd.DataFrame:
     columns = params["columns"]
-    df = handle_outliers_iqr(df, columns=columns, k=1.5, method="capping")
+    df = handle_outliers_iqr(df, columns=columns, k=params["k"], method=params["method"])
     return df
 
 def robust_scaler(df: pd.DataFrame) -> pd.DataFrame:

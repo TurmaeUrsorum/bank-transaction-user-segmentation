@@ -14,16 +14,19 @@ def register_pipelines() -> dict[str, Pipeline]:
     Returns:
         A mapping from pipeline names to ``Pipeline`` objects.
     """
-    
+
     data_cleaning_pipeline = dc.create_pipeline()
     data_preproses_pipeline = dp.create_pipeline()
     modeling_pipeline = md.create_pipeline()
     evaluasi_pipeline = ev.create_pipeline()
 
     return {
-        "__default__": data_cleaning_pipeline + data_preproses_pipeline + modeling_pipeline + evaluasi_pipeline,
+        "__default__": data_cleaning_pipeline
+        + data_preproses_pipeline
+        + modeling_pipeline
+        + evaluasi_pipeline,
         "dc": data_cleaning_pipeline,
         "dp": data_preproses_pipeline,
         "md": modeling_pipeline,
-        "ev": evaluasi_pipeline
+        "ev": evaluasi_pipeline,
     }

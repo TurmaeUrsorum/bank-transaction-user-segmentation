@@ -110,3 +110,7 @@ clean_bank_transaction:
 final_preprocessed_df:
   type: pandas.ParquetDataset
   filepath: data/05_model_input/final_preprocessed_df.parquet
+
+modeling_kmedoids:
+  type: pandas.ParquetDataset
+  filepath: data/07_model_output/modeling_kmedoids.parquet

@@ -106,3 +106,7 @@ clean_bank_transaction:
 # feature_engineering:
 #   type: pandas.ParquetDataset
 #   filepath: data/03_primary/feature_engineering.parquet
+
+final_preprocessed_df:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/final_preprocessed_df.parquet

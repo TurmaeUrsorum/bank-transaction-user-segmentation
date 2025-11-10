@@ -1,4 +1,4 @@
-name: bank_transaction_user_segmentation
+name: porto-bank-transaction-cluster
 channels:
   - conda-forge
   - defaults
@@ -380,12 +380,14 @@ dependencies:
       - black==25.9.0
       - branca==0.8.2
       - click-default-group==1.2.4
+      - coverage==7.11.1
       - fastapi==0.121.0
       - folium==0.20.0
       - geographiclib==2.1
       - geopy==2.4.1
       - gower==0.1.2
       - httptools==0.7.1
+      - iniconfig==2.3.0
       - ipython==8.37.0
       - kedro-viz==12.1.0
       - mypy-extensions==1.1.0
@@ -394,6 +396,8 @@ dependencies:
       - pathspec==0.12.1
       - pydantic==2.12.4
       - pydantic-core==2.41.5
+      - pytest==8.4.2
+      - pytest-cov==7.0.0
       - python-dotenv==1.2.1
       - pytokens==0.3.0
       - secure==1.0.1
@@ -404,3 +408,4 @@ dependencies:
       - watchfiles==1.1.1
       - websockets==15.0.1
       - xyzservices==2025.4.0
+prefix: /home/ayam/miniconda3/envs/porto-bank-transaction-cluster

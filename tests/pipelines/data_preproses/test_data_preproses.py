@@ -11,10 +11,12 @@ https://docs.pytest.org/en/latest/getting-started.html
 from bank_transaction_user_segmentation.pipelines.data_preproses.nodes import (
     feature_engineering,
     skew_fix,
+    handle_outliers,
 )
 from sklearn.preprocessing import PowerTransformer
 import pandas as pd
 import numpy as np
+import pytest
 
 
 def test_feature_engineering():
@@ -93,3 +95,30 @@ def test_skew_fix():
     pt = PowerTransformer(method="yeo-johnson")
     expected_yj = pt.fit_transform(df[["AmountBalanceRatio"]]).flatten()
     np.testing.assert_array_almost_equal(result["AmountBalanceRatio_yj"], expected_yj)
+
+
+@pytest.fixture
+def dataframe_for_handling_outliers():
+    return pd.DataFrame(
+        {
+            "TransactionAmount_log": [100, 200, 300, 10000],
+            "AmountBalanceRatio_yj": [25, 30, 35, 3000000],
+        }
+    )
+
+
+@pytest.mark.parametrize("method", ["capping", "remove"])
+def test_handling_outliers(dataframe_for_handling_outliers, method):
+    params = {
+        "columns": ["TransactionAmount_log", "AmountBalanceRatio_yj"],
+        "k": 1.5,
+        "method": method,
+    }
+
+    result = handle_outliers(dataframe_for_handling_outliers, params)
+
+    # tinggal assert sesuai metode
+    if method == "capping":
+        assert result.shape[0] == 4  # capping gak buang row
+    elif method == "remove":
+        assert result.shape[0] < 4  # remove bakal buang outlier

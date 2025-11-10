@@ -12,8 +12,9 @@ from bank_transaction_user_segmentation.pipelines.data_preproses.nodes import (
     feature_engineering,
     skew_fix,
     handle_outliers,
+    robust_scaler,
 )
-from sklearn.preprocessing import PowerTransformer
+from sklearn.preprocessing import PowerTransformer, RobustScaler
 import pandas as pd
 import numpy as np
 import pytest
@@ -122,3 +123,18 @@ def test_handling_outliers(dataframe_for_handling_outliers, method):
         assert result.shape[0] == 4  # capping gak buang row
     elif method == "remove":
         assert result.shape[0] < 4  # remove bakal buang outlier
+
+
+def test_robust_scaler():
+    df = pd.DataFrame({"TransactionAmount_log": [100, 200, 300]})
+
+    result = robust_scaler(df)
+
+    assert "TransactionAmount_log_scaled" in result.columns
+    assert "TransactionAmount_log" not in result.columns
+
+    scaler = RobustScaler()
+    expected_scaled = scaler.fit_transform(df[["TransactionAmount_log"]]).flatten()
+    np.testing.assert_array_almost_equal(
+        result["TransactionAmount_log_scaled"], expected_scaled
+    )

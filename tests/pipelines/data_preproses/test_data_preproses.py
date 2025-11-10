@@ -10,8 +10,11 @@ https://docs.pytest.org/en/latest/getting-started.html
 
 from bank_transaction_user_segmentation.pipelines.data_preproses.nodes import (
     feature_engineering,
+    skew_fix,
 )
+from sklearn.preprocessing import PowerTransformer
 import pandas as pd
+import numpy as np
 
 
 def test_feature_engineering():
@@ -60,3 +63,33 @@ def test_feature_engineering():
     )
     # Location Y cuma sekali → jadi OTHER
     assert (result.loc[result["Location"] == "Y", "LocationTopN"] == "OTHER").all()
+
+
+def test_skew_fix():
+    df = pd.DataFrame(
+        {
+            "TransactionAmount": [100, 200, 300],
+            "AccountBalance": [500, 600, 700],
+            "AmountBalanceRatio": [0.2, 0.33, 0.43],
+        }
+    )
+    params = {"method": "yeo-johnson"}
+
+    result = skew_fix(df, params=params)
+
+    # pastikan kolom baru ada
+    assert "TransactionAmount_log" in result.columns
+    assert "AmountBalanceRatio_yj" in result.columns
+
+    # pastikan kolom lama hilang
+    assert "TransactionAmount" not in result.columns
+    assert "AmountBalanceRatio" not in result.columns
+
+    # cek log transform-nya benar
+    expected_log = np.log1p(df["TransactionAmount"])
+    np.testing.assert_array_almost_equal(result["TransactionAmount_log"], expected_log)
+
+    # cek power transform-nya jalan
+    pt = PowerTransformer(method="yeo-johnson")
+    expected_yj = pt.fit_transform(df[["AmountBalanceRatio"]]).flatten()
+    np.testing.assert_array_almost_equal(result["AmountBalanceRatio_yj"], expected_yj)

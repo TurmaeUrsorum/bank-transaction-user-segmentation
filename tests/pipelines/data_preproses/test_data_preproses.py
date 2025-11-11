@@ -13,8 +13,9 @@ from bank_transaction_user_segmentation.pipelines.data_preproses.nodes import (
     skew_fix,
     handle_outliers,
     robust_scaler,
+    standar_scaler_numeric_proses,
 )
-from sklearn.preprocessing import PowerTransformer, RobustScaler
+from sklearn.preprocessing import PowerTransformer, RobustScaler, StandardScaler
 import pandas as pd
 import numpy as np
 import pytest
@@ -137,4 +138,16 @@ def test_robust_scaler():
     expected_scaled = scaler.fit_transform(df[["TransactionAmount_log"]]).flatten()
     np.testing.assert_array_almost_equal(
         result["TransactionAmount_log_scaled"], expected_scaled
+    )
+
+
+def test_standar_scaler_numeric_proses():
+    df = pd.DataFrame({"TransactionAmount_log": [100, 200, 300]})
+
+    result = standar_scaler_numeric_proses(df)
+
+    scaler = StandardScaler()
+    expected_scaled = scaler.fit_transform(df[["TransactionAmount_log"]]).flatten()
+    np.testing.assert_array_almost_equal(
+        result["TransactionAmount_log"], expected_scaled
     )

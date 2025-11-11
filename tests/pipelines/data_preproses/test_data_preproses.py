@@ -14,8 +14,9 @@ from bank_transaction_user_segmentation.pipelines.data_preproses.nodes import (
     handle_outliers,
     robust_scaler,
     standar_scaler_numeric_proses,
+    label_encoder_categorical_proses
 )
-from sklearn.preprocessing import PowerTransformer, RobustScaler, StandardScaler
+from sklearn.preprocessing import PowerTransformer, RobustScaler, StandardScaler, LabelEncoder
 import pandas as pd
 import numpy as np
 import pytest
@@ -151,3 +152,36 @@ def test_standar_scaler_numeric_proses():
     np.testing.assert_array_almost_equal(
         result["TransactionAmount_log"], expected_scaled
     )
+
+
+def test_encoder_categorical_proses():
+    # --- arrange ---
+    df = pd.DataFrame({
+        "TransactionType": ["DEBIT", "CREDIT", "CREDIT"],
+        "Channel": ["ATM", "MOBILE", "WEB"],
+        "Location": ["A", "B", "C"],
+        "MerchantID": ["M1", "M2", "M3"],
+    })
+
+    # --- act ---
+    result = label_encoder_categorical_proses(df)
+
+    # --- assert ---
+
+    # 1. Kolom Location dan MerchantID sudah dihapus
+    assert "Location" not in result.columns
+    assert "MerchantID" not in result.columns
+
+    # 2. Pastikan kolom yang tersisa adalah kategorikal lain
+    assert set(result.columns) == {"TransactionType", "Channel"}
+
+    # 3. Pastikan hasil encoding sama dengan LabelEncoder bawaan
+    le = LabelEncoder()
+    expected_transaction_type = le.fit_transform(df["TransactionType"])
+    np.testing.assert_array_equal(result["TransactionType"].values, expected_transaction_type) #type: ignore
+
+    expected_channel = le.fit_transform(df["Channel"])
+    np.testing.assert_array_equal(result["Channel"].values, expected_channel)# type: ignore
+
+    # 4. Pastikan semua kolom hasil encoding bertipe int
+    assert all(np.issubdtype(dtype, np.integer) for dtype in result.dtypes)

@@ -15,9 +15,14 @@ from bank_transaction_user_segmentation.pipelines.data_preproses.nodes import (
     robust_scaler,
     standar_scaler_numeric_proses,
     label_encoder_categorical_proses,
-    final_dataset
+    final_dataset,
 )
-from sklearn.preprocessing import PowerTransformer, RobustScaler, StandardScaler, LabelEncoder
+from sklearn.preprocessing import (
+    PowerTransformer,
+    RobustScaler,
+    StandardScaler,
+    LabelEncoder,
+)
 import pandas as pd
 import numpy as np
 import pytest
@@ -157,12 +162,14 @@ def test_standar_scaler_numeric_proses():
 
 def test_encoder_categorical_proses():
     # --- arrange ---
-    df = pd.DataFrame({
-        "TransactionType": ["DEBIT", "CREDIT", "CREDIT"],
-        "Channel": ["ATM", "MOBILE", "WEB"],
-        "Location": ["A", "B", "C"],
-        "MerchantID": ["M1", "M2", "M3"],
-    })
+    df = pd.DataFrame(
+        {
+            "TransactionType": ["DEBIT", "CREDIT", "CREDIT"],
+            "Channel": ["ATM", "MOBILE", "WEB"],
+            "Location": ["A", "B", "C"],
+            "MerchantID": ["M1", "M2", "M3"],
+        }
+    )
 
     # --- act ---
     result = label_encoder_categorical_proses(df)
@@ -179,48 +186,61 @@ def test_encoder_categorical_proses():
     # 3. Pastikan hasil encoding sama dengan LabelEncoder bawaan
     le = LabelEncoder()
     expected_transaction_type = le.fit_transform(df["TransactionType"])
-    np.testing.assert_array_equal(result["TransactionType"].values, expected_transaction_type) #type: ignore
+    np.testing.assert_array_equal(result["TransactionType"].values, expected_transaction_type)  # type: ignore
 
     expected_channel = le.fit_transform(df["Channel"])
-    np.testing.assert_array_equal(result["Channel"].values, expected_channel)# type: ignore
+    np.testing.assert_array_equal(result["Channel"].values, expected_channel)  # type: ignore
 
     # 4. Pastikan semua kolom hasil encoding bertipe int
     assert all(np.issubdtype(dtype, np.integer) for dtype in result.dtypes)
 
+
 def test_final_dataset(monkeypatch):
     # --- arrange ---
-    df = pd.DataFrame({
-        "TransactionAmount": [100, 200, 300],
-        "AccountBalance": [500, 600, 700],
-        "TransactionType": ["DEBIT", "CREDIT", "CREDIT"],
-        "Channel": ["ATM", "MOBILE", "WEB"],
-        "Location": ["A", "B", "C"],
-        "MerchantID": ["M1", "M2", "M3"],
-    })
+    df = pd.DataFrame(
+        {
+            "TransactionAmount": [100, 200, 300],
+            "AccountBalance": [500, 600, 700],
+            "TransactionType": ["DEBIT", "CREDIT", "CREDIT"],
+            "Channel": ["ATM", "MOBILE", "WEB"],
+            "Location": ["A", "B", "C"],
+            "MerchantID": ["M1", "M2", "M3"],
+        }
+    )
 
     # Mock fungsi scaler dan encoder biar gampang dites isolasinya
     def fake_scaler(df):
-        return pd.DataFrame({
-            "TransactionAmount": [0.0, 0.5, 1.0],
-            "AccountBalance": [0.0, 0.5, 1.0],
-        })
+        return pd.DataFrame(
+            {
+                "TransactionAmount": [0.0, 0.5, 1.0],
+                "AccountBalance": [0.0, 0.5, 1.0],
+            }
+        )
 
     def fake_encoder(df):
-        return pd.DataFrame({
-            "TransactionType": [0, 1, 1],
-            "Channel": [0, 1, 2],
-        })
+        return pd.DataFrame(
+            {
+                "TransactionType": [0, 1, 1],
+                "Channel": [0, 1, 2],
+            }
+        )
 
     # --- act ---
     # Patch fungsi agar gak panggil fungsi asli
     import bank_transaction_user_segmentation.pipelines.data_preproses.nodes as nodes
+
     monkeypatch.setattr(nodes, "standar_scaler_numeric_proses", fake_scaler)
     monkeypatch.setattr(nodes, "label_encoder_categorical_proses", fake_encoder)
 
     result = final_dataset(df)
 
     # --- assert ---
-    expected_cols = ["TransactionAmount", "AccountBalance", "TransactionType", "Channel"]
+    expected_cols = [
+        "TransactionAmount",
+        "AccountBalance",
+        "TransactionType",
+        "Channel",
+    ]
     assert list(result.columns) == expected_cols
     assert result.shape == (3, 4)
     assert result.isnull().sum().sum() == 0
